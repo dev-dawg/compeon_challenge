@@ -5,9 +5,21 @@
 # " - Part X of Y"
 
 # You need to fix this method, currently it will crash with > 160 char messages.
+
+# I made the assumption, that " - Part X of Y" is something the SMS client needs to put the message back together, so it is not included in the character limit.
 def send_sms_message(text, to, from)
   messages = text.scan(/.{1,160}/)
-  messages.each do |message|
+  messages_new = []
+
+  if messages.length > 1
+    messages.each_with_index do |m, i|
+      messages_new.push("#{m}#{' - Part '}#{i + 1}#{' of '}#{messages.length}")
+    end
+  else
+    messages_new.push(messages[0])
+  end
+
+  messages_new.each do |message|
     deliver_message_via_carrier(message, to, from)
   end
 end
