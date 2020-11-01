@@ -1,13 +1,17 @@
 require 'spec_helper'
 
 RSpec.describe MessageHandler, :aggregate_failures do
-  describe 'send_sms_message' do
+  describe '.send_sms_message' do
     before do
       allow(SMS_CARRIER).to receive(:deliver_message).and_return(true)
     end
 
     it 'calls the SMS Carrier' do
-      MessageHandler.send_sms_message('hello from Compeon', 'hello@you.de', 'compeon@compeon.de')
+      text = 'hello from Compeon'
+      to = 'hello@you.de'
+      from = 'compeon@compeon.de'
+
+      MessageHandler.send_sms_message(text, to, from)
 
       expect(SMS_CARRIER).to have_received(:deliver_message)
     end
@@ -15,7 +19,10 @@ RSpec.describe MessageHandler, :aggregate_failures do
     context 'when the text has more than 160 characters' do
       it 'splits the text and sends it separately' do
         text = 'a' * 165
-        MessageHandler.send_sms_message(text, 'hello@you.de', 'compeon@compeon.de')
+        to = 'hello@you.de'
+        from = 'compeon@compeon.de'
+
+        MessageHandler.send_sms_message(text, to, from)
 
         expect(SMS_CARRIER).to have_received(:deliver_message).twice
       end
